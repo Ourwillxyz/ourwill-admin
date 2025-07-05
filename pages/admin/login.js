@@ -1,25 +1,25 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
+// pages/admin/login.js
+
+import { useState } from "react";
+import { useRouter } from "next/router";
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
 
   const handleLogin = (e) => {
     e.preventDefault();
-
-    // Simple static login check for now
-    if (email === 'admin@ourwill.xyz' && password === 'ourwill2025') {
-      router.push('/admin/dashboard');
+    // Simulate login check
+    if (email === "admin@ourwill.xyz" && password === "admin123") {
+      router.push("/admin/dashboard");
     } else {
-      setError('Invalid credentials. Please try again.');
+      alert("Invalid credentials");
     }
   };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '400px', margin: 'auto' }}>
+    <div style={{ maxWidth: "400px", margin: "auto", paddingTop: "10%" }}>
       <h2>Admin Login</h2>
       <form onSubmit={handleLogin}>
         <input
@@ -28,7 +28,7 @@ export default function AdminLogin() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
+          style={{ width: "100%", marginBottom: "10px" }}
         />
         <input
           type="password"
@@ -36,13 +36,12 @@ export default function AdminLogin() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
+          style={{ width: "100%", marginBottom: "10px" }}
         />
-        <button type="submit" style={{ width: '100%', padding: '0.75rem' }}>
+        <button type="submit" style={{ width: "100%" }}>
           Login
         </button>
       </form>
-      {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
     </div>
   );
 }
