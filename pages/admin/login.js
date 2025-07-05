@@ -2,49 +2,44 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 
 export default function AdminLogin() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const router = useRouter();
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (res.ok) {
-        router.push('/admin/dashboard');
-      } else {
-        setError(data.message || 'Login failed');
-      }
-    } catch (err) {
-      setError('Server error');
+    if (res.ok) {
+      router.push('/admin/dashboard');
+    } else {
+      setError(data.message || 'Login failed');
     }
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
+    <div style={{ maxWidth: '400px', margin: '80px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
       <h2>Admin Login</h2>
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleSubmit}>
         <div>
-          <label>Email: </label><br />
+          <label>Username:</label><br />
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
-        <br />
-        <div>
-          <label>Password: </label><br />
+        <div style={{ marginTop: '10px' }}>
+          <label>Password:</label><br />
           <input
             type="password"
             value={password}
@@ -52,9 +47,8 @@ export default function AdminLogin() {
             required
           />
         </div>
-        <br />
-        <button type="submit">Login</button>
         {error && <p style={{ color: 'red' }}>{error}</p>}
+        <button type="submit" style={{ marginTop: '15px' }}>Login</button>
       </form>
     </div>
   );
