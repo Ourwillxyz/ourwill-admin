@@ -1,4 +1,3 @@
-// pages/api/login.js
 import { serialize } from 'cookie';
 import jwt from 'jsonwebtoken';
 
