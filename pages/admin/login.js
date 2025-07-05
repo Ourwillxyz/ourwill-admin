@@ -1,46 +1,57 @@
-// pages/admin/login.js
-
-import { useState } from "react";
-import { useRouter } from "next/router";
+import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate login check
-    if (email === "admin@ourwill.xyz" && password === "admin123") {
-      router.push("/admin/dashboard");
+    const res = await fetch('/admin/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem('token', data.token);
+      router.push('/admin/dashboard');
     } else {
-      alert("Invalid credentials");
+      setError(data.message);
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "auto", paddingTop: "10%" }}>
+    <div style={{ maxWidth: 400, margin: '50px auto', padding: 20, border: '1px solid #ccc', borderRadius: 10 }}>
       <h2>Admin Login</h2>
       <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ width: "100%", marginBottom: "10px" }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ width: "100%", marginBottom: "10px" }}
-        />
-        <button type="submit" style={{ width: "100%" }}>
-          Login
-        </button>
+        <div style={{ marginBottom: 10 }}>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            style={{ width: '100%', padding: 8 }}
+          />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{ width: '100%', padding: 8 }}
+          />
+        </div>
+        <button type="submit" style={{ width: '100%', padding: 10 }}>Login</button>
+        {error && <p style={{ color: 'red', marginTop: 10 }}>{error}</p>}
       </form>
     </div>
   );
