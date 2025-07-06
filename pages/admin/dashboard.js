@@ -1,28 +1,28 @@
-import { parse } from 'cookie';
-import jwt from 'jsonwebtoken';
-
-export async function getServerSideProps({ req }) {
-  const cookies = parse(req.headers.cookie || '');
-  const token = cookies.token || '';
-
-  try {
-    jwt.verify(token, 'ourwill-secret-key'); // same key used during login
-    return { props: {} };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: '/admin/login',
-        permanent: false,
-      },
-    };
-  }
-}
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 export default function AdminDashboard() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const res = await fetch('/api/token-check');
+      if (!res.ok) {
+        router.push('/admin/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
+
+  const handleLogout = async () => {
+    await fetch('/api/logout');
+    router.push('/admin/login');
+  };
+
   return (
-    <div style={{ maxWidth: '600px', margin: '50px auto', padding: '20px' }}>
-      <h1>Welcome to the Admin Dashboard</h1>
-      <p>This area is protected and requires login.</p>
+    <div style={{ padding: 20 }}>
+      <h2>Welcome to Admin Dashboard</h2>
+      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 }
