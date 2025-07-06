@@ -1,19 +1,27 @@
 import { useEffect, useState } from "react";
+import { supabase } from "../utils/supabaseClient";
 
 export default function PollsList() {
   const [polls, setPolls] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("polls");
-      setPolls(stored ? JSON.parse(stored) : []);
+    async function fetchPolls() {
+      const { data, error } = await supabase
+        .from("polls")
+        .select("*")
+        .order("created_at", { ascending: false });
+      setPolls(data || []);
+      setLoading(false);
     }
+    fetchPolls();
   }, []);
 
   return (
     <div style={{ maxWidth: 600, margin: "40px auto", padding: 20 }}>
       <h2>All Polls</h2>
-      {polls.length === 0 && <p>No polls found.</p>}
+      {loading && <p>Loading...</p>}
+      {!loading && polls.length === 0 && <p>No polls found.</p>}
       {polls.map((poll) => (
         <div
           key={poll.id}
