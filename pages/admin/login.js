@@ -1,67 +1,64 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Cookies from 'js-cookie';
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('');
+  const router = useRouter();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
 
     const res = await fetch('/api/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
     });
 
+    const data = await res.json();
+
     if (res.ok) {
-      // Wait for the cookie to be set, then redirect
-      setTimeout(() => {
-        router.push('/admin/dashboard');
-      }, 500);
+      Cookies.set('token', data.token);
+      router.push('/admin/dashboard');
     } else {
-      const data = await res.json();
-      setError(data.message || 'Login failed');
+      setError(data.message || 'Login failed. Please try again.');
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', textAlign: 'center' }}>
+    <div style={{ padding: '2rem', maxWidth: '400px', margin: 'auto' }}>
       <h2>Admin Login</h2>
       <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="admin@ourwill.xyz"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ padding: '10px', width: '100%', margin: '10px 0' }}
-        />
-        <input
-          type="password"
-          placeholder="Your secure password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ padding: '10px', width: '100%', margin: '10px 0' }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#0070f3',
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-            marginTop: '10px',
-          }}
-        >
+        <div>
+          <label>Username:</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            style={{ width: '100%', padding: '0.5rem', marginTop: '0.3rem' }}
+          />
+        </div>
+        <div style={{ marginTop: '1rem' }}>
+          <label>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{ width: '100%', padding: '0.5rem', marginTop: '0.3rem' }}
+          />
+        </div>
+        {error && (
+          <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>
+        )}
+        <button type="submit" style={{ marginTop: '1.5rem' }}>
           Login
         </button>
-        {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
       </form>
     </div>
   );
