@@ -17,10 +17,24 @@ export default function CreatePoll() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const poll = {
+      id: Date.now(),
+      question,
+      options: options.filter((o) => o.trim() !== ""),
+    };
+
+    // Get existing polls from localStorage
+    let polls = [];
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("polls");
+      polls = stored ? JSON.parse(stored) : [];
+      polls.push(poll);
+      localStorage.setItem("polls", JSON.stringify(polls));
+    }
+
     setMessage(
-      `Poll created! Question: "${question}", Options: ${options
-        .filter((o) => o)
-        .join(", ")}`
+      `Poll created! Question: "${question}", Options: ${poll.options.join(", ")}`
     );
     setQuestion("");
     setOptions(["", ""]);
