@@ -17,8 +17,11 @@ export default function CreatePoll() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // For now, just show the poll data as a message
-    setMessage(`Poll created! Question: "${question}", Options: ${options.filter(o=>o).join(", ")}`);
+    setMessage(
+      `Poll created! Question: "${question}", Options: ${options
+        .filter((o) => o)
+        .join(", ")}`
+    );
     setQuestion("");
     setOptions(["", ""]);
   };
@@ -32,7 +35,7 @@ export default function CreatePoll() {
           <input
             type="text"
             value={question}
-            onChange={e => setQuestion(e.target.value)}
+            onChange={(e) => setQuestion(e.target.value)}
             required
             style={{ width: "100%", marginBottom: 10, padding: 8 }}
           />
@@ -44,8 +47,8 @@ export default function CreatePoll() {
               key={idx}
               type="text"
               value={opt}
-              onChange={e => handleOptionChange(idx, e.target.value)}
-              required={idx < 2} // first 2 are required
+              onChange={(e) => handleOptionChange(idx, e.target.value)}
+              required={idx < 2}
               placeholder={`Option ${idx + 1}`}
               style={{ width: "100%", marginBottom: 8, padding: 8 }}
             />
