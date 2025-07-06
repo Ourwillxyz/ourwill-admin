@@ -1,40 +1,28 @@
 import { parse } from 'cookie';
 import jwt from 'jsonwebtoken';
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
 
-export default function AdminDashboard({ isAuthenticated }) {
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/admin/login');
-    }
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated) return null;
-
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Welcome to Admin Dashboard</h1>
-      <ul>
-        <li><a href="/admin/candidates">Manage Candidates</a></li>
-        <li><a href="/admin/settings">Settings</a></li>
-        <li><a href="/admin/logout">Logout</a></li>
-      </ul>
-    </div>
-  );
-}
-
-export async function getServerSideProps(context) {
-  const { req } = context;
+export async function getServerSideProps({ req }) {
   const cookies = parse(req.headers.cookie || '');
   const token = cookies.token || '';
 
   try {
-    jwt.verify(token, 'secret-key'); // replace with env in production
-    return { props: { isAuthenticated: true } };
-  } catch (err) {
-    return { props: { isAuthenticated: false } };
+    jwt.verify(token, 'ourwill-secret-key'); // same key used during login
+    return { props: {} };
+  } catch (error) {
+    return {
+      redirect: {
+        destination: '/admin/login',
+        permanent: false,
+      },
+    };
   }
+}
+
+export default function AdminDashboard() {
+  return (
+    <div style={{ maxWidth: '600px', margin: '50px auto', padding: '20px' }}>
+      <h1>Welcome to the Admin Dashboard</h1>
+      <p>This area is protected and requires login.</p>
+    </div>
+  );
 }
