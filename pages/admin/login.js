@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 
 export default function AdminLogin() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleLogin = async (e) => {
@@ -12,35 +13,44 @@ export default function AdminLogin() {
     const response = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     });
 
+    const data = await response.json();
+
     if (response.ok) {
+      // Save token in cookie
+      document.cookie = `token=${data.token}; path=/`;
       router.push('/admin/dashboard');
     } else {
-      alert('Login failed. Please try again.');
+      setError(data.message || 'Login failed');
     }
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Admin Login</h1>
+    <div style={{ maxWidth: '400px', margin: '80px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
+      <h2>Admin Login</h2>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={handleLogin}>
         <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
-        /><br /><br />
+          style={{ width: '100%', marginBottom: '10px', padding: '10px' }}
+        />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-        /><br /><br />
-        <button type="submit">Login</button>
+          style={{ width: '100%', marginBottom: '10px', padding: '10px' }}
+        />
+        <button type="submit" style={{ width: '100%', padding: '10px' }}>
+          Login
+        </button>
       </form>
     </div>
   );
