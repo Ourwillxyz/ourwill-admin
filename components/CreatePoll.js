@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { supabase } from "../utils/supabaseClient";
 
 export default function CreatePoll() {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleOptionChange = (idx, value) => {
     const newOptions = [...options];
@@ -15,29 +17,26 @@ export default function CreatePoll() {
     setOptions([...options, ""]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    const poll = {
-      id: Date.now(),
+    const pollData = {
       question,
       options: options.filter((o) => o.trim() !== ""),
     };
 
-    // Get existing polls from localStorage
-    let polls = [];
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("polls");
-      polls = stored ? JSON.parse(stored) : [];
-      polls.push(poll);
-      localStorage.setItem("polls", JSON.stringify(polls));
-    }
+    const { error } = await supabase.from("polls").insert([pollData]);
 
-    setMessage(
-      `Poll created! Question: "${question}", Options: ${poll.options.join(", ")}`
-    );
-    setQuestion("");
-    setOptions(["", ""]);
+    setLoading(false);
+
+    if (error) {
+      setMessage("Error creating poll: " + error.message);
+    } else {
+      setMessage("Poll created!");
+      setQuestion("");
+      setOptions(["", ""]);
+    }
   };
 
   return (
@@ -71,9 +70,11 @@ export default function CreatePoll() {
             Add Option
           </button>
         </div>
-        <button type="submit">Create Poll</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Creating..." : "Create Poll"}
+        </button>
       </form>
-      {message && <div style={{ marginTop: 20, color: "green" }}>{message}</div>}
+      {message && <div style={{ marginTop: 20, color: message.startsWith("Error") ? "red" : "green" }}>{message}</div>}
     </div>
   );
 }
