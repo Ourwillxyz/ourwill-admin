@@ -13,7 +13,8 @@ function setCors(res) {
 }
 
 function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // 4-digit OTP
+  return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
 // Mock SMS sender: logs OTP to the server console
@@ -41,7 +42,8 @@ export default async function handler(req, res) {
   OTP_STORE[mobile] = { otp, expires: Date.now() + OTP_EXPIRY };
   try {
     await sendSMS(mobile, otp);
-    return res.status(200).json({ success: true, message: "OTP sent (mock SMS)" });
+    // For DEV ONLY: Return OTP in response so frontend can use it
+    return res.status(200).json({ success: true, message: "OTP sent (mock SMS)", otp }); 
   } catch (err) {
     return res.status(500).json({ error: "Failed to send OTP" });
   }
