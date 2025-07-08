@@ -1,6 +1,6 @@
 const OTP_STORE = require('./otp-store.js');
 
-const OTP_EXPIRY = 1 * 60 * 1000; // 1 minutes
+const OTP_EXPIRY = 1 * 60 * 1000; // 1 minute
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
