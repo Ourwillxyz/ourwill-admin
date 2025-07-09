@@ -1,30 +1,46 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const africastalking = require('africastalking');
+const nodemailer = require('nodemailer');
 
-// Step 1: Paste your Africa's Talking sandbox credentials here:
-const username = 'sandbox'; // Use 'sandbox' for sandbox, or your app username for production
-const apiKey = 'atsk_10b02077f73cd946a2361ca612707c26b54679d4734f9e8630e9939bec3685898a9bd639'; // <--- Paste your API key between the quotes
-
-const at = africastalking({ username, apiKey });
-const sms = at.SMS;
+// Step 1: Configure your Zoho SMTP credentials here:
+const transporter = nodemailer.createTransport({
+  host: 'smtp.zoho.com',
+  port: 465, // Use 587 for TLS if you prefer
+  secure: true, // true for 465, false for 587
+  auth: {
+    user: 'your_email@yourdomain.com',        // <-- Your Zoho email address
+    pass: 'YOUR_ZOHO_APP_PASSWORD'            // <-- Your Zoho app password (not your account password)
+  }
+});
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Step 2: This endpoint will send SMS when called from your frontend:
-app.post('/send-sms', async (req, res) => {
-  const { to, message } = req.body;
+// Step 2: This endpoint will send OTP via email when called from your frontend:
+app.post('/send-otp', async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    return res.status(400).json({ success: false, message: 'Email and OTP are required.' });
+  }
+
+  const mailOptions = {
+    from: '"Your App Name" <your_email@yourdomain.com>', // Friendly from name + email
+    to: email,
+    subject: 'Your OTP Code',
+    text: `Your OTP code is: ${otp}`
+  };
+
   try {
-    const response = await sms.send({ to: [`+${to}`], message });
-    res.json({ success: true, response });
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true, message: 'OTP sent to email!' });
   } catch (err) {
     res.json({ success: false, error: err.message });
   }
 });
 
 app.listen(5000, () => {
-  console.log("Africa's Talking SMS backend running on http://localhost:5000");
+  console.log('Email OTP backend running on http://localhost:5000');
 });
