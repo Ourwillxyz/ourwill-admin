@@ -1,6 +1,18 @@
 const OTP_STORE = require('./otp-store.js');
+const nodemailer = require('nodemailer');
 
 const OTP_EXPIRY = 1 * 60 * 1000; // 1 minute
+
+// Configure your Zoho SMTP transporter
+const transporter = nodemailer.createTransport({
+  host: 'smtp.zoho.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: 'your_email@yourdomain.com',        // <-- Replace with your Zoho email address
+    pass: 'YOUR_ZOHO_APP_PASSWORD'            // <-- Replace with your Zoho app password
+  }
+});
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -17,13 +29,17 @@ function generateOTP() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
-// Mock SMS sender: logs OTP to the server console
-async function sendSMS(mobile, otp) {
-  console.log(`Mock SMS: Send OTP ${otp} to mobile ${mobile}`);
-  return true;
+async function sendEmail(email, otp) {
+  const mailOptions = {
+    from: '"Your App Name" <your_email@yourdomain.com>', // Replace with your app/email
+    to: email,
+    subject: 'Your OTP Code',
+    text: `Your OTP code is: ${otp}`
+  };
+  await transporter.sendMail(mailOptions);
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   setCors(res);
 
   if (req.method === "OPTIONS") {
@@ -34,17 +50,20 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
-  const { mobile } = req.body;
-  if (!mobile) {
-    return res.status(400).json({ error: "Mobile number required" });
+
+  const { mobile, email } = req.body;
+  if (!mobile || !email) {
+    return res.status(400).json({ error: "Mobile number and email are required." });
   }
+
   const otp = generateOTP();
   OTP_STORE[mobile] = { otp, expires: Date.now() + OTP_EXPIRY };
+
   try {
-    await sendSMS(mobile, otp);
+    await sendEmail(email, otp);
     // For DEV ONLY: Return OTP in response so frontend can use it
-    return res.status(200).json({ success: true, message: "OTP sent (mock SMS)", otp }); 
+    return res.status(200).json({ success: true, message: "OTP sent to email", otp }); 
   } catch (err) {
     return res.status(500).json({ error: "Failed to send OTP" });
   }
-}
+};
