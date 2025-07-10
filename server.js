@@ -9,8 +9,8 @@ const transporter = nodemailer.createTransport({
   port: 465, // Use 587 for TLS if you prefer
   secure: true, // true for 465, false for 587
   auth: {
-    user: 'your_email@yourdomain.com',        // <-- Your Zoho email address
-    pass: 'YOUR_ZOHO_APP_PASSWORD'            // <-- Your Zoho app password (not your account password)
+    user: 'admin@ourwill.xyz',        // <-- Your Zoho email address
+    pass: '61JZpi6NH444'            // <-- Your Zoho app password (not your account password)
   }
 });
 
@@ -27,7 +27,7 @@ app.post('/send-otp', async (req, res) => {
   }
 
   const mailOptions = {
-    from: '"Your App Name" <your_email@yourdomain.com>', // Friendly from name + email
+    from: '"Your App Name" <admin@ourwill.xyz>', // Friendly from name + email
     to: email,
     subject: 'Your OTP Code',
     text: `Your OTP code is: ${otp}`
