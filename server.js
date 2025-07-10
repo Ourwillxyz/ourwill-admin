@@ -17,7 +17,7 @@ app.post('/send-otp', async (req, res) => {
   try {
     await transporter.sendMail(mailOptions);
     res.json({ success: true, message: 'OTP sent to email!' });
-    // For real apps, save the OTP with the email in database or cache for later verification!
+    // You can store the otp somewhere for validation if needed
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
