@@ -9,8 +9,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: 'your_email@yourdomain.com',        // <-- Replace with your Zoho email address
-    pass: 'YOUR_ZOHO_APP_PASSWORD'            // <-- Replace with your Zoho app password (not your login password)
+    user: 'admin@ourwill.xyz',        // <-- Replace with your Zoho email address
+    pass: '61JZpi6NH444'            // <-- Replace with your Zoho app password (not your login password)
   },
   connectionTimeout: 10000, // 10 seconds
   greetingTimeout: 5000,
