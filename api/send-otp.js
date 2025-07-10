@@ -10,8 +10,11 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: 'your_email@yourdomain.com',        // <-- Replace with your Zoho email address
-    pass: 'YOUR_ZOHO_APP_PASSWORD'            // <-- Replace with your Zoho app password
-  }
+    pass: 'YOUR_ZOHO_APP_PASSWORD'            // <-- Replace with your Zoho app password (not your login password)
+  },
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 5000,
+  socketTimeout: 10000
 });
 
 function setCors(res) {
@@ -31,12 +34,14 @@ function generateOTP() {
 
 async function sendEmail(email, otp) {
   const mailOptions = {
-    from: '"Your App Name" <your_email@yourdomain.com>', // Replace with your app/email
+    from: '"Your App Name" <your_email@yourdomain.com>', // <-- Replace with your app/email
     to: email,
     subject: 'Your OTP Code',
     text: `Your OTP code is: ${otp}`
   };
+  console.log(`[OTP] Attempting to send OTP email to ${email}`);
   await transporter.sendMail(mailOptions);
+  console.log(`[OTP] Email sent to ${email}`);
 }
 
 module.exports = async function handler(req, res) {
@@ -61,9 +66,9 @@ module.exports = async function handler(req, res) {
 
   try {
     await sendEmail(email, otp);
-    // For DEV ONLY: Return OTP in response so frontend can use it
-    return res.status(200).json({ success: true, message: "OTP sent to email", otp }); 
+    return res.status(200).json({ success: true, message: "OTP sent to email" }); // Remove OTP in production!
   } catch (err) {
-    return res.status(500).json({ error: "Failed to send OTP" });
+    console.error("[OTP] Failed to send OTP email:", err);
+    return res.status(500).json({ error: "Failed to send OTP", details: err.message });
   }
 };
