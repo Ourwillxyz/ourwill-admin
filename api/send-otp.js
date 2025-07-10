@@ -34,7 +34,7 @@ function generateOTP() {
 
 async function sendEmail(email, otp) {
   const mailOptions = {
-    from: '"Your App Name" <your_email@yourdomain.com>', // <-- Replace with your app/email
+    from: '"Your App Name" <admin@ourwill.xyz>', // <-- Replace with your app/email
     to: email,
     subject: 'Your OTP Code',
     text: `Your OTP code is: ${otp}`
