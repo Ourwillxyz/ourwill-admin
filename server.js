@@ -1,6 +1,5 @@
 app.post('/send-otp', async (req, res) => {
   const { email } = req.body;
-
   if (!email) {
     return res.status(400).json({ success: false, message: 'Email is required.' });
   }
@@ -18,7 +17,7 @@ app.post('/send-otp', async (req, res) => {
   try {
     await transporter.sendMail(mailOptions);
     res.json({ success: true, message: 'OTP sent to email!' });
-    // In production, do not send the OTP back in the response!
+    // For real apps, save the OTP with the email in database or cache for later verification!
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
