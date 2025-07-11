@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: 'admin@ourwill.xyz', // Replace with your Zoho email
-    pass: 'ZUrhCWsspAMc' // Replace with your Zoho app password
+    pass: 'vhFa9E4vhFUi' // Replace with your Zoho app password
   }
 });
 
