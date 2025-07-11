@@ -1,54 +1,35 @@
 const express = require('express');
-const cors = require('cors');
 const nodemailer = require('nodemailer');
-
 const app = express();
-const PORT = 5000;
 
-// Middlewares
-app.use(cors());
 app.use(express.json());
 
-// Configure Nodemailer with your Zoho SMTP credentials
 const transporter = nodemailer.createTransport({
   host: 'smtp.zoho.com',
   port: 465,
   secure: true,
   auth: {
-    user: 'admin@ourwill.xyz', // replace with your actual Zoho email
-    pass: 'vhFa9E4vhFUi' // replace with your actual app password (use env var in production!)
+    user: process.env.ZOHO_EMAIL,
+    pass: process.env.ZOHO_APP_PASSWORD
   }
 });
 
-// POST /send-otp endpoint: receives { email, otp } and sends email
 app.post('/send-otp', async (req, res) => {
   const { email, otp } = req.body;
-  if (!email || !otp) {
-    return res.status(400).json({ success: false, message: 'Email and OTP are required.' });
-  }
-
-  const mailOptions = {
-    from: '"OurWill" <admin@ourwill.xyz>',
-    to: email,
-    subject: 'Your OTP Code',
-    text: `Your OTP code is: ${otp}`
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
+    await transporter.sendMail({
+      from: `"OurWill" <${process.env.ZOHO_EMAIL}>`,
+      to: email,
+      subject: 'Your OTP Code',
+      text: `Your OTP is: ${otp}`
+    });
     res.json({ success: true, message: 'OTP sent to email!' });
-  } catch (err) {
-    console.error('Email send error:', err); // <--- LOG THE REAL ERROR!
-    res.status(500).json({ success: false, error: err.message });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// Test route
-app.get('/', (req, res) => {
-  res.send('Email OTP backend is running!');
-});
-
-// Start the server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Email OTP backend running on http://localhost:${PORT}`);
 });
