@@ -1,64 +1,50 @@
 const express = require('express');
-const cors = require('cors');
 const nodemailer = require('nodemailer');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const app = express();
-const PORT = 5000;
-
-// Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-// Configure Nodemailer with your Zoho SMTP credentials
+// Configure Nodemailer for Zoho SMTP (port 587, secure: false)
 const transporter = nodemailer.createTransport({
   host: 'smtp.zoho.com',
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false, // TLS
   auth: {
-    user: 'admin@ourwill.xyz', // Replace with your Zoho email
-    pass: 'vhFa9E4vhFUi' // Replace with your Zoho app password
+    user: 'admin@ourwill.xyz', // <-- Your Zoho email address
+    pass: 'vhFa9E4vhFUi' // <-- Your Zoho app password (not your regular password)
   }
 });
 
-// Utility function to generate a random 4-digit OTP
-function generateOTP() {
-  return Math.floor(1000 + Math.random() * 9000).toString();
-}
-
-// POST /send-otp endpoint: receives { email, otp } and sends email
+// Endpoint to send OTP email
 app.post('/send-otp', async (req, res) => {
-  console.log('Raw req.body:', req.body); // Debug log
-
-  // Destructure and validate request body
   const { email, otp } = req.body;
+
+  // Simple validation
   if (!email || !otp) {
-    return res.status(400).json({ success: false, message: 'Email and OTP are required.' });
+    return res.status(400).json({ success: false, error: 'Email and OTP are required.' });
   }
 
-  // Prepare mail options
-  const mailOptions = {
-    from: '"OurWill" <admin@ourwill.xyz>',
-    to: email,
-    subject: 'Your OTP Code',
-    text: `Your OTP code is: ${otp}`
-  };
-
-  // Try sending the email
   try {
-    await transporter.sendMail(mailOptions);
-    res.json({ success: true, message: 'OTP sent to email!' });
+    // Send email
+    let info = await transporter.sendMail({
+      from: '"OurWill Admin" <admin@ourwill.xyz>', // sender
+      to: email,
+      subject: 'Your OTP Code',
+      html: `<p>Your OTP code is: <b>${otp}</b></p>`
+    });
+
+    return res.json({ success: true, message: 'OTP sent to email!', info });
   } catch (err) {
     console.error('Email send error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// Optional GET route for testing server status
-app.get('/', (req, res) => {
-  res.send('Email OTP backend is running!');
-});
-
-// Start the server
+// Start server
+const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Email OTP backend running on http://localhost:${PORT}`);
 });
