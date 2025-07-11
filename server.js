@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: 'admin@ourwill.xyz', // replace with your actual Zoho email
-    pass: '61JZpi6NH444' // replace with your actual app password
+    pass: '61JZpi6NH444' // replace with your actual app password (use env var in production!)
   }
 });
 
@@ -38,6 +38,7 @@ app.post('/send-otp', async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.json({ success: true, message: 'OTP sent to email!' });
   } catch (err) {
+    console.error('Email send error:', err); // <--- LOG THE REAL ERROR!
     res.status(500).json({ success: false, error: err.message });
   }
 });
