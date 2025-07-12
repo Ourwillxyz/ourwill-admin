@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         pass: process.env.ZOHO_APP_PASSWORD,
       },
       tls: {
-        rejectUnauthorized: false, // Optional in production
+        rejectUnauthorized: false, // For testing; set to true for production
       },
     });
 
