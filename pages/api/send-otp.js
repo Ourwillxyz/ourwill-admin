@@ -20,9 +20,7 @@ export default async function handler(req, res) {
         user: process.env.ZOHO_EMAIL,
         pass: process.env.ZOHO_APP_PASSWORD,
       },
-      tls: {
-        rejectUnauthorized: false, // For testing; set to true for production
-      },
+      tls: { rejectUnauthorized: false },
     });
 
     await transporter.sendMail({
