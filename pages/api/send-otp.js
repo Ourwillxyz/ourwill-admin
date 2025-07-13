@@ -1,50 +1,44 @@
 // pages/api/send-otp.js
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res
-      .status(405)
-      .json({ success: false, message: 'Method Not Allowed' });
+    return res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }
 
   const { email } = req.body;
 
   if (!email) {
-    return res
-      .status(400)
-      .json({ success: false, message: 'Email is required.' });
+    return res.status(400).json({ success: false, message: 'Email is required.' });
   }
 
   try {
-    const { data, error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: 'https://ourwill.vercel.app/auth/callback',
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/magiclink`, {
+      method: 'POST',
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        email,
+        options: {
+          emailRedirectTo: 'https://ourwill.vercel.app/auth/callback', // ✅ Adjust this for production
+        },
+      }),
     });
 
-    if (error) {
-      console.error('Supabase OTP Error:', error.message);
-      return res
-        .status(500)
-        .json({ success: false, message: 'Failed to send OTP.', error: error.message });
+    const data = await response.json();
+
+    if (response.ok) {
+      return res.status(200).json({ success: true });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: data?.msg || 'Magic link error',
+      });
     }
-
-    return res
-      .status(200)
-      .json({ success: true, message: 'OTP sent successfully!' });
-
-  } catch (err) {
-    console.error('Unexpected Error:', err);
-    return res
-      .status(500)
-      .json({ success: false, message: 'Unexpected server error.', error: err.message });
+  } catch (error) {
+    console.error('Magic link error:', error);
+    return res.status(500).json({ success: false, message: 'Server error while sending magic link.' });
   }
 }
