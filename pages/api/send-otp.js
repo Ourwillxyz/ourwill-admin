@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         email,
         options: {
-          emailRedirectTo: 'https://ourwill.vercel.app/auth/callback', // ✅ Adjust this for production
+          emailRedirectTo: 'https://ourwill.vercel.app/auth/callback',
         },
       }),
     });
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     } else {
       return res.status(500).json({
         success: false,
-        message: data?.msg || 'Magic link error',
+        message: data?.msg || data?.error_description || 'Failed to send magic link.',
       });
     }
   } catch (error) {
