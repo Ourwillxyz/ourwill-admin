@@ -1,38 +1,50 @@
-import nodemailer from 'nodemailer';
+// pages/api/send-otp.js
+
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+    return res
+      .status(405)
+      .json({ success: false, message: 'Method Not Allowed' });
   }
 
-  const { email, otp } = req.body;
+  const { email } = req.body;
 
-  if (!email || !otp) {
-    return res.status(400).json({ success: false, message: 'Email and OTP are required.' });
+  if (!email) {
+    return res
+      .status(400)
+      .json({ success: false, message: 'Email is required.' });
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.zoho.com',
-      port: 587,
-      secure: false, // TLS for port 587
-      auth: {
-        user: process.env.ZOHO_EMAIL,
-        pass: process.env.ZOHO_APP_PASSWORD,
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: 'https://ourwill.vercel.app/auth/callback',
       },
-      tls: { rejectUnauthorized: false },
     });
 
-    await transporter.sendMail({
-      from: `"OurWill OTP" <${process.env.ZOHO_EMAIL}>`,
-      to: email,
-      subject: 'Your OTP Code',
-      text: `Your One-Time Password is: ${otp}\n\nThis OTP will expire shortly.`,
-    });
+    if (error) {
+      console.error('Supabase OTP Error:', error.message);
+      return res
+        .status(500)
+        .json({ success: false, message: 'Failed to send OTP.', error: error.message });
+    }
 
-    return res.status(200).json({ success: true, message: 'OTP sent successfully!' });
-  } catch (error) {
-    console.error('Error sending OTP:', error);
-    return res.status(500).json({ success: false, message: 'Failed to send OTP.', error: error.message });
+    return res
+      .status(200)
+      .json({ success: true, message: 'OTP sent successfully!' });
+
+  } catch (err) {
+    console.error('Unexpected Error:', err);
+    return res
+      .status(500)
+      .json({ success: false, message: 'Unexpected server error.', error: err.message });
   }
 }
