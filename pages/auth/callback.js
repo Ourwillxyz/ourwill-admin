@@ -4,25 +4,25 @@ import { useRouter } from 'next/router';
 import { supabase } from '../../src/supabaseClient';
 
 export default function AuthCallback() {
-  const router = useRouter();
   const [status, setStatus] = useState('Processing login...');
+  const router = useRouter();
 
   useEffect(() => {
-    const handleLogin = async () => {
+    const verifySession = async () => {
       const { data, error } = await supabase.auth.getSession();
 
       if (error || !data?.session) {
-        setStatus('❌ Login failed or expired. Try again.');
+        setStatus('❌ Login failed. Please try again.');
         return;
       }
 
       setStatus('✅ Login successful! Redirecting...');
       setTimeout(() => {
-        router.push('/dashboard'); // Change this to your post-login page
+        router.push('/dashboard');
       }, 1500);
     };
 
-    handleLogin();
+    verifySession();
   }, [router]);
 
   return (
