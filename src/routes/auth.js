@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import pool from '../db.js'; // Make sure your db.js exports the pool
+import { pool } from '../db.js';
 
 const router = express.Router();
 
@@ -31,7 +31,7 @@ router.post('/register', async (req, res) => {
     res.status(201).json({ message: 'User registered successfully', userId: result.rows[0].id });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Registration failed' });
+    res.status(500).json({ error: error.message });
   }
 });
 
