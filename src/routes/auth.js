@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import { pool } from '../db.js';
+import { pool } from '../db.js'; // Use named import!
 
 const router = express.Router();
 
@@ -17,10 +17,8 @@ router.post('/register', async (req, res) => {
       password,
     } = req.body;
 
-    // Hash the password
     const password_hash = await bcrypt.hash(password, 10);
 
-    // Insert user into database
     const result = await pool.query(
       `INSERT INTO users (
         username, email, mobile, county_code, subcounty_code, ward_code, polling_centre_code, password_hash
