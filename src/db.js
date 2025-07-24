@@ -1,8 +1,7 @@
-const { Pool } = require('pg');
+import { Pool } from 'pg';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // This is the variable Render provides for your PostgreSQL database
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  // If you want SSL (for Render/Postgres), uncomment below:
+  // ssl: { rejectUnauthorized: false }
 });
-
-module.exports = pool;
