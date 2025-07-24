@@ -1,35 +1,24 @@
 import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
-import router from "./routes.js";
-
-dotenv.config();
-
-// Connect to MongoDB if using a database
-if (process.env.MONGODB_URI) {
-  mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-    .then(() => console.log("MongoDB connected."))
-    .catch((err) => console.error("MongoDB connection error:", err));
-}
+import cors from "cors";
+import registerRouter from "./routes/register.js"; // path may vary
 
 const app = express();
-app.use(express.json());
 
-const allowedOrigin = process.env.CORS_ORIGIN || "http://localhost:3000";
-app.use(cors({ origin: allowedOrigin }));
+// Middleware
+app.use(cors({
+  origin: "https://ourwill.vercel.app", // allow your frontend domain
+  credentials: true
+}));
+app.use(express.json()); // parse JSON bodies
 
-// Optional: Health check route for root
-app.get("/", (req, res) => {
-  res.send("API is running!");
-});
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-app.use("/api", router);
+// Use the register route
+app.use("/api", registerRouter); // /api/register will be your endpoint
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
